@@ -1,0 +1,14 @@
+<network>
+  <name>win_vms</name>
+  <uuid>fae7147d-5b0d-4d98-a571-f4438d8111a4</uuid>
+  <forward mode='open'/>
+  <bridge name='virbr1' stp='on' delay='0'/>
+  <mac address='52:54:00:23:57:5e'/>
+  <ip address='192.168.121.1' prefix='24'>
+    <dhcp>
+      <range start='192.168.121.2' end='192.168.121.254'/>
+      <host mac='52:54:00:31:51:7c' name='win11' ip='192.168.121.100'/>
+    </dhcp>
+  </ip>
+</network>
+
