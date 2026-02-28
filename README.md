@@ -23,14 +23,14 @@ It handles:
 
 ## Host System Specifications
 
-**Laptop model:** ASUS TUF FA507NVR
-**CPU:** AMD Ryzen 7435HS
-**GPU:** Nvidia RTX 4060 Laptop
-**iGPU:** nothing
-**RAM:** 32 GB DDR5
-**Storage:** 1 TB NVMe
-**Host OS:** Fedora 43 KDE Plasma Edition
-**Kernel:** 6.18.12-200.fc43.x86_64
+* **Laptop model:** ASUS TUF FA507NVR
+* **CPU:** AMD Ryzen 7435HS
+* **GPU:** Nvidia RTX 4060 Laptop
+* **iGPU:** nothing
+* **RAM:** 32 GB DDR5
+* **Storage:** 1 TB NVMe
+* **Host OS:** Fedora 43 KDE Plasma Edition
+* **Kernel:** 6.18.12-200.fc43.x86_64
 
 ---
 
