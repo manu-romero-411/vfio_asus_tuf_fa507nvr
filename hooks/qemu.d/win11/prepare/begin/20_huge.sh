@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-## Load VM variables
-source "/etc/libvirt/hooks/qemu.d/win11/vm-vars.conf"
+SCRIPT_NAME="hugepages_enable"
+#exec >> /tmp/vfio-hook.log 2>&1
+log_title "INICIO (args: $*)"
 
 ## Calculate number of hugepages to allocate from memory (in MB)
 HUGEPAGES="$(($VM_MEMORY/$(($(grep Hugepagesize /proc/meminfo | awk '{print $2}')))))"
@@ -12,9 +14,8 @@ ALLOC_PAGES=$(cat /proc/sys/vm/nr_hugepages)
 
 
 ## If successful, notify user
-if [ "$ALLOC_PAGES" -eq "$HUGEPAGES" ]
-then
-    echo "Succesfully allocated $ALLOC_PAGES / $HUGEPAGES pages!"
+if [ "$ALLOC_PAGES" -eq "$HUGEPAGES" ]; then
+    log_ok "Succesfully allocated $ALLOC_PAGES / $HUGEPAGES pages!"
 fi
 
 
@@ -33,16 +34,15 @@ do
     echo $HUGEPAGES > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
     ALLOC_PAGES=$(cat /proc/sys/vm/nr_hugepages)
     ## If successful, notify user
-    echo "Succesfully allocated $ALLOC_PAGES / $HUGEPAGES pages!"
+    log_ok "Succesfully allocated $ALLOC_PAGES / $HUGEPAGES pages!"
     let TRIES+=1
 done
 
 ## If still unable to allocate all requested pages, revert hugepages and quit
-if [ "$ALLOC_PAGES" -ne "$HUGEPAGES" ]
-then
-    echo "Not able to allocate all hugepages. Reverting..."
+if [ "$ALLOC_PAGES" -ne "$HUGEPAGES" ]; then
+    log_warn "Not able to allocate all hugepages. Reverting..."
     echo 0 > /proc/sys/vm/nr_hugepages
     exit 1
 fi
-
-sleep 1
+log_title "FIN (args: $*)"
+sleep 0.5

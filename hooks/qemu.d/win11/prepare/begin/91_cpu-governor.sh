@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-## Load VM variables
-source "/etc/libvirt/hooks/qemu.d/win11/vm-vars.conf"
+SCRIPT_NAME="cpu_governor"
+#exec >> /tmp/vfio-hook.log 2>&1
+log_title "INICIO (args: $*)"
 
 ## Set CPU governor to mode indicated by variable
 CPU_COUNT=0
@@ -15,4 +17,5 @@ done
 ## Set system power profile to performance
 powerprofilesctl set $VM_ON_PWRPROFILE
 
-sleep 1
+log_title "FIN (args: $*)"
+sleep 0.5

@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Author: Sebastiaan Meijer (sebastiaan@passthroughpo.st)
+# Modified by Manu Romero (github.com/manu-romero-411)
 #
 # Copy this file to /etc/libvirt/hooks, make sure it's called "qemu".
 # After this file is installed, restart libvirt.
@@ -9,32 +10,45 @@
 # For a list of available hooks, please refer to https://www.libvirt.org/hooks.html
 #
 
+set -e # If a script exits with an error, we should as well.
+
 GUEST_NAME="$1"
 HOOK_NAME="$2"
 STATE_NAME="$3"
-MISC="${@:4}"
-
-BASEDIR="$(dirname $0)"
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 HOOKPATH="$BASEDIR/qemu.d/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
-
 mkdir -p "$HOOKPATH"
-if [ -f "$BASEDIR/qemu.d/$GUEST_NAME/vm-vars.conf" ]; then
+
+# we need to source the common functions as well as the per-vm variables
+set -a
+if [ -f "$BASEDIR/qemu.functions" ] \
+&& [ -s "$BASEDIR/qemu.functions" ] \
+&& [ -x "$BASEDIR/qemu.functions" ]; then
+	. "$BASEDIR/qemu.functions"
+fi
+
+if [ -f "$BASEDIR/qemu.d/$GUEST_NAME/vm-vars.conf" ] \
+&& [ -s "$BASEDIR/qemu.d/$GUEST_NAME/vm-vars.conf" ]; then
 	. "$BASEDIR/qemu.d/$GUEST_NAME/vm-vars.conf"
 fi
+set +a
 
-set -e # If a script exits with an error, we should as well.
 
 # check if it's a non-empty executable file
-if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH"] && [ -x "$HOOKPATH" ]; then
-    eval \"$HOOKPATH\" "$@"
+if [ -f "$HOOKPATH" ] \
+&& [ -s "$HOOKPATH" ] \
+&& [ -x "$HOOKPATH" ]; then
+	"$HOOKPATH" "$@" || exit 1
 elif [ -d "$HOOKPATH" ]; then
-    while read file; do
-        # check for null string
-        if [ ! -z "$file" ]; then
-#          eval \"$file\" "$@"
-          eval \"$file\" "$@"
-        fi
-    done <<< "$(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print | sort)"
+	while IFS= read -r file; do
+		# check for null string
+		if [ -f "$file" ] \
+		&& [ -s "$file" ] \
+		&& [ -x "$file" ]; then
+			"$file" "$@" || exit 1
+		fi
+	done < <(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print | sort)
 fi
 
+exit 0

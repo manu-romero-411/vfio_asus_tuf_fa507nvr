@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-SCRIPT_NAME="nvidia"
-
-log(){ if [ "$1" == "-v" ]; then echo "[*] (unbind - $SCRIPT_NAME) $*"; fi; }
-log_warn(){ if [ "$1" == "-v" ]; then echo "[!] (unbind - $SCRIPT_NAME) $*"; fi; }
-log_ok(){ if [ "$1" == "-v" ]; then echo "[✓] (unbind - $SCRIPT_NAME) $*"; fi; }
-log_err(){ if [ "$1" == "-v" ]; then echo "[x] (unbind - $SCRIPT_NAME) $*"; fi; }
+SCRIPT_NAME="nvidia_restore"
+#exec >> /tmp/vfio-hook.log 2>&1
+log_title "INICIO (args: $*)"
 
 FLAG_FILE="/tmp/vfio-is-nvidia"
 
@@ -38,3 +34,4 @@ if [ -f "$FLAG_FILE" ] && grep -q "true" "$FLAG_FILE"; then
 else
     log_err "Flag VFIO NVIDIA no presente — no se hace nada"
 fi
+log_title "FIN (args: $*)"

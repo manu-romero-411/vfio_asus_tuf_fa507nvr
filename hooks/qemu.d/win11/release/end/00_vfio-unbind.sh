@@ -1,39 +1,25 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 SCRIPT_NAME="vfio_unbind"
+#exec >> /tmp/vfio-hook.log 2>&1
+log_title "INICIO (args: $*)"
 
-log(){ if [ "$1" == "-v" ]; then echo "[*] (unbind - $SCRIPT_NAME) $*"; fi; }
-log_warn(){ if [ "$1" == "-v" ]; then echo "[!] (unbind - $SCRIPT_NAME) $*"; fi; }
-log_ok(){ if [ "$1" == "-v" ]; then echo "[✓] (unbind - $SCRIPT_NAME) $*"; fi; }
-log_err(){ if [ "$1" == "-v" ]; then echo "[x] (unbind - $SCRIPT_NAME) $*"; fi; }
-
-unbind_device() {
-    local dev="$1"
-    local vendor device
-
-    vendor=$(cat /sys/bus/pci/devices/$dev/vendor)
-    device=$(cat /sys/bus/pci/devices/$dev/device)
-    vendor=${vendor#0x}
-    device=${device#0x}
-
-    log "Reasignando driver original a $dev"
-    echo "$dev" > /sys/bus/pci/drivers_probe
-}
-
-# Descargar módulos VFIO si nadie más los usa
-log "Descargando módulos VFIO..."
-modprobe -r vfio_pci || true
-modprobe -r vfio_iommu_type1 || true
-modprobe -r vfio || true
-
-# === IOMMU 13 ===
-unbind_device "0000:01:00.0"
-unbind_device "0000:01:00.1"
-
-# === IOMMU 17 ===
-unbind_device "0000:05:00.0"
+unload_vfio_modules
 
 # === IOMMU 22 ===
+# 05:00.6 Audio: AMD Ryzen HD Audio Controller [1022:15e3]
 unbind_device "0000:05:00.6"
+
+# === IOMMU 17 ===
+# 05:00.0 Non-Essential Instrumentation: AMD Dummy Function [1002:145a]
+unbind_device "0000:05:00.0"
+
+# === IOMMU 13 ===
+# 01:00.0 VGA: NVIDIA AD107M [GeForce RTX 4060 Max-Q / Mobile] [10de:28e0]
+unbind_device "0000:01:00.0"
+# 01:00.1 Audio: NVIDIA AD107 HD Audio [10de:22be]
+unbind_device "0000:01:00.1"
+
+log_title "FIN (args: $*)"
+sleep 0.5
