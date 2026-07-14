@@ -21,5 +21,16 @@ unbind_device "0000:01:00.0"
 # 01:00.1 Audio: NVIDIA AD107 HD Audio [10de:22be]
 unbind_device "0000:01:00.1"
 
+#=====
+
+# 2. Eliminar físicamente la GPU del árbol PCI del kernel para resetear su estado energético
+echo 1 > /sys/bus/pci/devices/0000:01:00.0/remove
+echo 1 > /sys/bus/pci/devices/0000:01:00.1/remove
+sleep 2
+
+# 3. Forzar un rescan global del bus PCIe para revivir el GSP firmware desde cero
+echo 1 > /sys/bus/pci/rescan
+sleep 2
+
 log_title "FIN (args: $*)"
 sleep 0.5

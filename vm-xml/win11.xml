@@ -9,7 +9,7 @@
   <memory unit='KiB'>16777216</memory>
   <currentMemory unit='KiB'>16777216</currentMemory>
   <memoryBacking>
-    <hugepages/>
+    <locked/>
     <source type='memfd'/>
     <access mode='shared'/>
   </memoryBacking>
@@ -55,13 +55,15 @@
       <frequencies state='on'/>
       <tlbflush state='on'/>
       <ipi state='on'/>
-      <avic state='on'/>
+      <avic state='off'/>
     </hyperv>
     <vmport state='off'/>
     <smm state='on'/>
   </features>
   <cpu mode='host-passthrough' check='none' migratable='on'>
     <topology sockets='1' dies='1' clusters='1' cores='6' threads='2'/>
+    <feature policy='require' name='topoext'/>
+    <feature policy='require' name='svm'/>
   </cpu>
   <clock offset='localtime'>
     <timer name='rtc' tickpolicy='catchup'/>
@@ -85,9 +87,14 @@
       <target dev='vda' bus='virtio'/>
       <address type='pci' domain='0x0000' bus='0x07' slot='0x00' function='0x0'/>
     </disk>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/var/lib/libvirt/images/win_apps.qcow2'/>
+      <target dev='vdb' bus='virtio'/>
+      <address type='pci' domain='0x0000' bus='0x09' slot='0x00' function='0x0'/>
+    </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
-      <source file='/var/penguin/sistemos/virtio-win-0.1.285.iso'/>
       <target dev='sdb' bus='sata'/>
       <readonly/>
       <address type='drive' controller='0' bus='0' target='0' unit='1'/>
@@ -174,26 +181,19 @@
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
-    <input type='tablet' bus='usb'>
-      <address type='usb' bus='0' port='1'/>
-    </input>
-    <input type='mouse' bus='virtio'>
-      <address type='pci' domain='0x0000' bus='0x09' slot='0x00' function='0x0'/>
-    </input>
-    <input type='keyboard' bus='virtio'>
-      <address type='pci' domain='0x0000' bus='0x0a' slot='0x00' function='0x0'/>
-    </input>
     <input type='mouse' bus='ps2'/>
     <input type='keyboard' bus='ps2'/>
     <tpm model='tpm-crb'>
-      <backend type='emulator' version='2.0'/>
+      <backend type='emulator' version='2.0'>
+        <profile name='default-v1'/>
+      </backend>
     </tpm>
     <audio id='1' type='none'/>
     <hostdev mode='subsystem' type='pci' managed='yes'>
       <source>
         <address domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
       </source>
-      <rom bar='on'/>
+      <rom file='/usr/share/OVMF/10de_28e0.rom'/>
       <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0' multifunction='on'/>
     </hostdev>
     <hostdev mode='subsystem' type='pci' managed='yes'>
@@ -229,10 +229,10 @@
     </memballoon>
   </devices>
   <qemu:commandline>
-    <qemu:arg value='-overcommit'/>
-    <qemu:arg value='cpu-pm=on'/>
     <qemu:arg value='-object'/>
     <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-path/platform-i8042-serio-0-event-kbd,grab_all=on,repeat=on'/>
+    <qemu:arg value='-overcommit'/>
+    <qemu:arg value='mem-lock=on'/>
   </qemu:commandline>
 </domain>
 

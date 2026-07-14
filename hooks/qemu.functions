@@ -10,7 +10,6 @@ _C='\e[1;36m'  # bold cyan
 _W='\e[1;37m'  # bold white
 _X='\e[0m'     # reset
 
-# log messages
 SCRIPT_NAME=""
 log()      { echo -e "${_W}[*] (${SCRIPT_NAME}) $*${_X}"; }
 log_warn() { echo -e "${_Y}[!] (${SCRIPT_NAME}) $*${_X}"; }
@@ -18,12 +17,12 @@ log_ok()   { echo -e "${_G}[✓] (${SCRIPT_NAME}) $*${_X}"; }
 log_err()  { echo -e "${_R}[x] (${SCRIPT_NAME}) $*${_X}"; }
 log_title(){ echo -e "${_C}==== ${SCRIPT_NAME}: $* ====${_X}"; }
 
-# get the user that is logged in graphically
+#
 get_active_user() {
     loginctl list-sessions --no-legend | awk '{print $3}' | head -n1
 }
 
-# check which driver does a pci device have currently
+#
 check_current_driver(){
     if [[ -L "/sys/bus/pci/devices/$dev/driver" ]]; then
         current_driver=$(basename "$(readlink "/sys/bus/pci/devices/$dev/driver")")
@@ -33,7 +32,7 @@ check_current_driver(){
     echo "${current_driver}"
 }
 
-# load vfio kernel modules if they aren't already loaded
+#
 load_vfio_modules(){
 	log "Cargando módulos VFIO..."
 	modprobe vfio || exit 1
@@ -41,7 +40,7 @@ load_vfio_modules(){
 	modprobe vfio_iommu_type1 || exit 1
 }
 
-# unload vfio kernel modules
+#
 unload_vfio_modules(){
 	log "Descargando módulos VFIO..."
 	modprobe -r vfio_pci || true
@@ -49,7 +48,7 @@ unload_vfio_modules(){
 	modprobe -r vfio || true
 }
 
-# bind pci device to vfio-pci
+#
 bind_device() {
     local dev="$1"
     local vendor device current_driver
@@ -95,8 +94,7 @@ bind_device() {
     fi
 }
 
-# unbind device from vfio-pci and rebind it to its original driver
-# (trying to detect it automatically using drivers_probe)
+#
 unbind_device() {
     local dev="$1"
     local vendor device
